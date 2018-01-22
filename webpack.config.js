@@ -1,54 +1,32 @@
-"use strict";
+/**
+ * Webpack Configuration
+ */
 
-const isDevBuild = process.env.NODE_ENV !== "production";
+/* eslint-disable no-var */
+var path = require('path');
+var webpack = require('webpack');
+var webpackConfig = require('./webpack.config.base');
+var locale = process.env.LOCALE || 'en-US';
+var config = webpackConfig(locale);
 
-const webpack = require('webpack');
-const path = require('path');
+var babelLoader = {
+    test: /\.jsx?$/,
+    loaders: ['babel'],
+    exclude: /node_modules/,
+};
 
-module.exports = {
-  devtool: isDevBuild ? 'inline-sourcemap' : null,
-  entry: path.join(__dirname, 'src', 'app-client.js'),
-  devServer: {
-    inline: true,
-    port: 3333,
-    contentBase: "src/static/",
-    historyApiFallback: {
-      index: '/index-static.html'
-    }
-  },
-  output: {
-    path: path.join(__dirname, 'src', 'static', 'js'),
-    publicPath: "/js/",
-    filename: 'bundle.js'
-  },
-  module: {
-    loaders: [
-      { test: /.json$/, loader: "json-loader" },
-      {
-      test: path.join(__dirname, 'src'),
-      loader: ['babel-loader'],
-      query: {
-        cacheDirectory: 'babel_cache',
-        presets: isDevBuild ? ['react', 'es2015', 'react-hmre'] : ['react', 'es2015']
-      }
-    }]
-  },
-  plugins: [
-    new webpack.DefinePlugin({
-      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
-      'GALAXY_API_BACKEND': JSON.stringify(process.env.GALAXY_API_BACKEND),
-      'GALAXY_API_VERSION': JSON.stringify(process.env.GALAXY_API_VERSION),
-      'GITHUB_OAUTH_ID': JSON.stringify(process.env.GITHUB_OAUTH_ID),
-      'GITHUB_REDIRECTUI': JSON.stringify(process.env.GITHUB_REDIRECTUI)
-    }),
-    new webpack.optimize.DedupePlugin(),
+// http://www.cnblogs.com/Answer1215/p/4312265.html
+// The source map file will only be downloaded if you have source maps enabled and your dev tools open.
+config.devtool = 'source-map';
+config.module.loaders.push(babelLoader);
+config.output.path = path.resolve('dist', locale);
+config.plugins = config.plugins.concat([
     new webpack.optimize.OccurenceOrderPlugin(),
     new webpack.optimize.UglifyJsPlugin({
-      compress: { warnings: false },
-      mangle: true,
-      sourcemap: false,
-      beautify: false,
-      dead_code: true
-    }),
-  ]
-};
+        compress: {
+            warnings: false,
+        },
+    })
+]);
+
+module.exports = config;

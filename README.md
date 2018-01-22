@@ -1,4 +1,4 @@
-# manageiq-galaxy
+# manageiq-exchange
 A simple application built to share content.
 
 # Setting
